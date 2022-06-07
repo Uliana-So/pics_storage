@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block title %}Add images{% endblock %}
+
+{% block content %}
+<div>
+    <h1>Here you can add images</h1>
+    <form enctype="multipart/form-data"  action="" method="post" style="font-size: 20px; color: rgb(125, 20, 20)">
+        {% csrf_token %}
+        <p>Image's name: {{ form.title }}</p>
+        <p>Add images: {{ form.image }}</p>
+        <button type="submit" class="btn btn-success">Add</button>
+        <button type="submit" class="btn btn-info">Cancel</button>
+    </form>
+
+    {% for img in img_obj %}
+        <br><img src="{{ img.image.url }}" alt="connect" style="max-height:300px">
+        <p>Name: {{ img.title }}</p>
+    {% endfor %}
+</div>
+{% endblock %}

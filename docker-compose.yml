@@ -1,0 +1,61 @@
+version: '3.3'
+
+services:
+    db:
+        image: postgres:14
+        container_name: postgres
+        environment:
+            POSTGRES_USER: db_user
+            POSTGRES_DB: db_name
+            POSTGRES_PASSWORD: db_user_password
+        expose:
+            - "5432"
+        # ports:
+            # - "5432:5432"
+        volumes:
+            - postgresql:/var/lib/postgresql/data
+        networks:
+            - django_project
+
+    django:
+        container_name: django
+        depends_on:
+            - db
+        build:
+            context: .
+            dockerfile: Dockerfile
+        command: bash -c "python manage.py makemigrations &&
+                python manage.py migrate && 
+                python manage.py collectstatic --noinput &&
+                uwsgi --ini uwsgi.ini"
+        expose:
+            - "5040"
+        networks:
+            - django_project
+        volumes:
+            - static:/opt/django_project/static
+            - media:/opt/django_project/media
+
+    nginx:
+        container_name: nginx
+        image: nginx:latest
+        depends_on:
+            - django
+        ports:
+            - "8000:80"
+        networks:
+            - django_project
+        volumes:
+            - "./srcs/nginx.conf:/etc/nginx/nginx.conf"
+            - static:/opt/django_project/static
+            - media:/opt/django_project/media
+
+
+volumes:
+    postgresql:
+    media:
+    static:
+
+
+networks:
+    django_project:
